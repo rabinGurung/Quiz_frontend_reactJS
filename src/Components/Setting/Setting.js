@@ -1,6 +1,7 @@
 import React from "react";
 import Axios from "axios";
 import Set from './Set'
+
 export default class Setting extends React.Component{
     constructor(){
         super()
@@ -28,11 +29,11 @@ export default class Setting extends React.Component{
         var see = null
         var answer1 = []
         var num = this.state.num_of_ans
-        for(var i = 0;i<num;i++){
+        for(var i = 0;i<num;i++){   // the input field for answer count is default 2 at first. 
                 answer1.push(<input type="text" className="form-control" key={this.state.answers[i]} id={i} onChange={this.onchangeInput} placeholder="Answer"/>)
             }
         
-        if(this.state.isadd){
+        if(this.state.isadd){   // by default see variable would be null 
             see = (
                 <div className="container">
                     <h1 className="text-center">Enter your Question</h1>
@@ -40,7 +41,7 @@ export default class Setting extends React.Component{
                     <input type="text" className="form-control" id="question" onChange={this.onchangeInput} placeholder="Question"/>
                         {answer1} </div>
                     <div>
-                    <button className="form-control btn btn-light" onClick={this.onMoreInputClick}>More Answer</button>
+                    <button className="form-control btn btn-light" onClick={this.onMoreInputClick}>More Answer</button>  
                     <button className="form-control btn btn-light" onClick={this.onPostquestion}>Post Question</button>
                     </div>
                     </div>
@@ -66,8 +67,8 @@ export default class Setting extends React.Component{
                 </div>
         )
     }
-    onCheckLimit(question,ans){
-        Axios.get("/answer/getCountAns/"+question)
+    onCheckLimit(question){    
+        Axios.get("/answer/getCountAns/"+question)   //checking for the answer option count / the count should not exceed limit 5
         .then((result)=>{
             var count = result.data.count[0].cnt
             if(count === -1){
@@ -87,7 +88,7 @@ export default class Setting extends React.Component{
     }
     addMoreAns(question){
         var ans = prompt("Please type your answer")
-        if(ans == null){
+        if(ans == null){          
             return
         }
         while(ans === "" || ans === undefined){
@@ -112,6 +113,8 @@ export default class Setting extends React.Component{
         })
     }
     componentDidMount(){
+        // tried to created random five unique keys 
+        // So that the count of answer post could be as per need
         var seconds = new Date().getTime() / 1000;
         var keys =  Array.from({length: 5}, () => Math.floor(Math.random() * seconds));
         var data = {}
@@ -124,7 +127,8 @@ export default class Setting extends React.Component{
         })
         this.get_Question_Answer_data()
     }
-    get_Question_Answer_data(){
+ 
+    get_Question_Answer_data(){ // fetching data from the DB // fetching question name and answer option of that question with corect answer index
         Axios.get("/question/getques")
         .then((result)=>{
             var data = []
@@ -158,14 +162,12 @@ export default class Setting extends React.Component{
                     Sets : data
                 })
             }
-            console.log(data)
-
         })
         .catch((error)=>{
             console.log("error getting data")
         })
     }
-    onchangeInput(e){
+    onchangeInput(e){  // on change input for question and answer field
         if(e.target.id === "question"){
             this.setState({
                 question : e.target.value
@@ -174,7 +176,7 @@ export default class Setting extends React.Component{
         }
         var key = this.state.answers[e.target.id]
         var ans = e.target.value
-        this.setState( prev=> {
+        this.setState( prev=> {           // populating state variables
             let mainAnswer = Object.assign({}, prev.mainAnswer);
             mainAnswer[key] = ans
             return {mainAnswer};
@@ -190,7 +192,7 @@ export default class Setting extends React.Component{
 
     onMoreInputClick(e){
         e.preventDefault()
-        if(this.state.num_of_ans < 5){
+        if(this.state.num_of_ans < 5){   // the num_of_ans variable is for answer count constraint to 5 limiting the answer
             this.setState({                
                 num_of_ans : this.state.num_of_ans + 1  
             })
@@ -200,29 +202,32 @@ export default class Setting extends React.Component{
     onPostquestion(e){
         e.preventDefault()
         let question = ""
-        if(this.onNullCheck(this.state.question)){
+        if(this.onNullCheck(this.state.question)){  //validating question
             alert("Please proide Question")
             return
         }
             question = this.state.question
 
-            for(let i = 0; i<this.state.num_of_ans;i++){
+            for(let i = 0; i<this.state.num_of_ans;i++){    // validating multiple answer
                 let ans = this.state.mainAnswer[this.state.answers[i]]
                 if(this.onNullCheck(ans)){
                     alert("Please proide answer on all fields")
                     return
                 }
             }
+
             
+            // promting for correct answer and getting the correct index of the answer to store in DB
             var correct_answer = prompt("Now, provide your correct answer")
             while(correct_answer === null || correct_answer === undefined || correct_answer === null){
                 correct_answer = prompt("Now, provide your correct answer")
-            }
+            }                                                           
             var correct = -1
-            for(let j = 0; j<this.state.num_of_ans;j++){
+            for(let j = 0; j<this.state.num_of_ans;j++){  // linear search to get index of the correct answer
                 let ansY = this.state.mainAnswer[this.state.answers[j]]
                 if(ansY === correct_answer){
                     correct = j
+                    break
                 }
             }
             if(correct === -1){
@@ -245,7 +250,7 @@ export default class Setting extends React.Component{
     }
 
     postAnswer(question,correct){
-        for(let i = 0; i<this.state.num_of_ans;i++){
+        for(let i = 0; i<this.state.num_of_ans;i++){  //the array holds different answer option and they are added to DB
             let ans = this.state.mainAnswer[this.state.answers[i]]
             Axios.post("/answer/postans",{
                 "answer":ans,
@@ -261,7 +266,7 @@ export default class Setting extends React.Component{
         
     }
 
-    onNullCheck(elm){
+    onNullCheck(elm){   //check for empty or undefined value
         if(elm === "" || elm === undefined)
             return true
         return false

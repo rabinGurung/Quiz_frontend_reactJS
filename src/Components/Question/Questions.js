@@ -9,7 +9,6 @@ export default class Questions extends React.Component{
             question:"",
             answer:[],
             correct:0,
-            next:false
         }
         this.fetchDataFromServer = this.fetchDataFromServer.bind(this)
         this.onClickNext = this.onClickNext.bind(this)
@@ -34,14 +33,14 @@ export default class Questions extends React.Component{
         e.preventDefault()
         var id = e.target.id
         var array = this.state.data
-        console.log(array)
+        // finding correct index and checking if the obtained answer's index is the correct answer's index
         for(var x = 0; x<array.length; x++){
                 if(array[x].name === this.state.question){
                     var array1 = array[x].answer
                 for(var y = 0; y<array1.length; y++){
                 if(array1[y] === id) {
                     console.log(this.state.data)
-                if(y === this.state.data[x].correct){
+                if(y === this.state.data[x].correct){   
                     alert("Correct Answer")
                 }
                 }
@@ -53,7 +52,7 @@ export default class Questions extends React.Component{
     componentDidMount(){
         this.fetchDataFromServer()
     }
-    fetchDataFromServer(){
+    fetchDataFromServer(){  // fetching data from the server
         axios.get("/question/getques")
         .then((result)=>{
             var data = []
@@ -101,10 +100,9 @@ export default class Questions extends React.Component{
         })
         
     }
-    onClickNext(e){
+    onClickNext(e){  // every click will change the index
         e.preventDefault()
         if(this.state.run < this.state.data.length){
-            if(this.state.next === false){
                 this.setState({
                     run : this.state.run + 1 ,
                     question:this.state.data[this.state.run].name,
@@ -112,15 +110,6 @@ export default class Questions extends React.Component{
                         correct:this.state.data[this.state.run].correct,
                         next:true
                 })
-            }else{
-                this.setState({
-                    run : this.state.run + 1 ,
-                    question:this.state.data[this.state.run].name,
-                        answer:this.state.data[this.state.run].answer,
-                        correct:this.state.data[this.state.run].correct,
-                        next:true
-                })
-            }
         }
     }          
 }

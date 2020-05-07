@@ -23,7 +23,7 @@ export default class Set extends React.Component{
 
     AddMoreAnswer(e){
         e.preventDefault()
-        this.props.onCheckLimit(this.props.question) 
+        this.props.onCheckLimit(this.props.question)  // calling the prop parent function and passing question
     }
 
 }
